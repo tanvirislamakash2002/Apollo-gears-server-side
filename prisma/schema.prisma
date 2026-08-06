@@ -8,9 +8,89 @@ datasource db {
 }
 
 model User {
-    id        String   @id @default(uuid())
-    email     String   @unique
-    name      String?
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  id             String    @id @default(uuid())
+  email          String    @unique
+  password       String?
+  name           String?
+  role           Role      @default(USER)
+  profileImage   String?
+  rating         Float     @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  rents          Rent[]
+  bids           Bid[]
+}
+
+model Car {
+  id                String   @id @default(uuid())
+  name              String
+  brand             String
+  model             String
+  image             String?
+  fuelType          FuelType
+  passengerCapacity Int
+  color             String
+  condition         Condition
+  rating            Float    @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  rents             Rent[]
+}
+
+model Rent {
+  id           String   @id @default(uuid())
+  startingPoint String
+  destination   String
+  rentStatus    RentStatus @default(PENDING)
+  userId       String
+  carId        String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id])
+  car          Car      @relation(fields: [carId], references: [id])
+  bids         Bid[]
+}
+
+model Bid {
+  id            String    @id @default(uuid())
+  bidAmount     Float
+  bidStatus     BidStatus @default(PENDING)
+  driverLocation String
+  rentId        String
+  driverId      String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  rent          Rent      @relation(fields: [rentId], references: [id])
+  driver        User      @relation(fields: [driverId], references: [id])
+}
+
+enum Role {
+  ADMIN
+  USER
+  DRIVER
+}
+
+enum FuelType {
+  OCTANE
+  HYBRID
+  ELECTRIC
+  DIESEL
+  PETROL
+}
+
+enum Condition {
+  NEW
+  USED
+}
+
+enum RentStatus {
+  PENDING
+  ONGOING
+  COMPLETED
+}
+
+enum BidStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
 }
