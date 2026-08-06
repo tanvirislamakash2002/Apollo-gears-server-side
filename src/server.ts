@@ -3,29 +3,44 @@ import config from './config';
 import { prisma } from './lib/prisma';
 
 let server = null as ReturnType<typeof app.listen> | null;
+let shuttingDown = false;
 
-const shutdown = async (reason: string, error?: unknown) => {
-  console.error(`Shutting down due to ${reason}`);
-  if (error) {
-    console.error(error instanceof Error ? error.stack ?? error.message : error);
-  }
+const closeHttpServer = async () => {
+  if (!server) return;
 
-  if (server) {
-    await new Promise<void>((resolve) => {
-      server?.close(() => {
-        console.log('HTTP server closed');
-        resolve();
-      });
+  return new Promise<void>((resolve) => {
+    server?.close(() => {
+      console.log('HTTP server closed');
+      resolve();
     });
-  }
+  });
+};
 
+const closeDatabase = async () => {
   try {
     await prisma.$disconnect();
     console.log('Database connection closed');
   } catch (disconnectError) {
     console.error('Error while disconnecting database:', disconnectError);
   }
+};
 
+const shutdown = async (reason: string, error?: unknown) => {
+  if (shuttingDown) return;
+  shuttingDown = true;
+
+  console.error(`Shutting down due to ${reason}`);
+  if (error) {
+    console.error(error instanceof Error ? error.stack ?? error.message : error);
+  }
+
+  const timeout = setTimeout(() => {
+    console.error('Shutdown timeout reached, forcing exit');
+    process.exit(1);
+  }, 10000);
+
+  await Promise.allSettled([closeHttpServer(), closeDatabase()]);
+  clearTimeout(timeout);
   process.exit(error ? 1 : 0);
 };
 
