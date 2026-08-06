@@ -5,7 +5,10 @@ const notFound = (req: Request, res: Response) => {
   res.status(httpStatus.NOT_FOUND).json({
     success: false,
     message: 'API Not Found',
-    error: ""
+    error: {
+      path: req.originalUrl,
+      message: 'Your requested URL was not found on this server!',
+    },
   });
 };
 

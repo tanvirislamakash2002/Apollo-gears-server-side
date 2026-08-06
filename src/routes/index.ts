@@ -1,17 +1,16 @@
-import { Request, Response, Router } from 'express';
-import httpStatus from 'http-status';
+import { Router } from 'express';
 
 const router = Router();
 
-export const notFound = (req: Request, res: Response) => {
-  res.status(httpStatus.NOT_FOUND).json({
-    success: false,
-    message: 'API Not Found',
-    error: {
-      path: req.originalUrl,
-      message: 'Your requested URL was not found on this server!',
-    },
-  });
-};
+const moduleRoutes: { path: string, route: Router }[] = [
+  // { 
+  //   path: '/users', 
+  //   route: UserRoutes 
+  // },
+];
+
+moduleRoutes.forEach((route) => {
+  router.use(route.path, route.route);
+});
 
 export default router;
