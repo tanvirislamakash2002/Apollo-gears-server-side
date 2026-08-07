@@ -8,21 +8,23 @@ datasource db {
 }
 
 model User {
-  id             String    @id @default(uuid())
-  email          String    @unique
-  password       String?
-  name           String?
-  role           Role      @default(USER)
-  profileImage   String?
-  rating         Float     @default(0)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  rents          Rent[]
-  bids           Bid[]
+  id           String   @id @default(uuid())
+  email        String   @unique
+  password     String?
+  name         String?
+  role         Role     @default(USER)
+  profileImage String?
+  rating       Float    @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  rents        Rent[]
+  bids         Bid[] @relation("DriverBids")
+
+  @@map("users")
 }
 
 model Car {
-  id                String   @id @default(uuid())
+  id                String    @id @default(uuid())
   name              String
   brand             String
   model             String
@@ -31,37 +33,43 @@ model Car {
   passengerCapacity Int
   color             String
   condition         Condition
-  rating            Float    @default(0)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  rating            Float     @default(0)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
   rents             Rent[]
+
+  @@map("cars")
 }
 
 model Rent {
-  id           String   @id @default(uuid())
+  id            String     @id @default(uuid())
   startingPoint String
   destination   String
   rentStatus    RentStatus @default(PENDING)
-  userId       String
-  carId        String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  user         User     @relation(fields: [userId], references: [id])
-  car          Car      @relation(fields: [carId], references: [id])
-  bids         Bid[]
+  userId        String
+  carId         String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  user          User       @relation(fields: [userId], references: [id])
+  car           Car        @relation(fields: [carId], references: [id])
+  bids          Bid[]
+
+  @@map("rents")
 }
 
 model Bid {
-  id            String    @id @default(uuid())
-  bidAmount     Float
-  bidStatus     BidStatus @default(PENDING)
+  id             String    @id @default(uuid())
+  bidAmount      Float
+  bidStatus      BidStatus @default(PENDING)
   driverLocation String
-  rentId        String
-  driverId      String
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  rent          Rent      @relation(fields: [rentId], references: [id])
-  driver        User      @relation(fields: [driverId], references: [id])
+  rentId         String
+  driverId       String
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  rent           Rent      @relation(fields: [rentId], references: [id])
+  driver         User      @relation("DriverBids", fields: [driverId], references: [id])
+
+  @@map("bids")
 }
 
 enum Role {
