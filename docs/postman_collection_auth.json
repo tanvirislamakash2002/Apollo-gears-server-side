@@ -1,0 +1,138 @@
+{
+  "info": {
+    "name": "Apollo Gears Backend - Auth",
+    "_postman_id": "apollo-gears-auth-collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Register",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\",\n  \"name\": \"{{testName}}\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/auth/register"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const res = pm.response.json();",
+              "pm.test('status 201', () => pm.response.to.have.status(201));",
+              "if (res?.data?.id) pm.environment.set('userId', res.data.id);",
+              "if (res?.data?.email) pm.environment.set('createdUserEmail', res.data.email);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/auth/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const res = pm.response.json();",
+              "pm.test('login ok', () => pm.response.to.have.status(200));",
+              "if (res?.data?.accessToken) pm.environment.set('accessToken', res.data.accessToken);",
+              "// extract refreshToken from set-cookie header if present",
+              "const setCookie = pm.response.headers.get('set-cookie');",
+              "if (setCookie) {",
+              "  const m = setCookie.match(/refreshToken=([^;]+)/);",
+              "  if (m) pm.environment.set('refreshToken', m[1]);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Refresh Token",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/auth/refresh-token"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const res = pm.response.json();",
+              "pm.test('refreshed', () => pm.response.to.have.status(200));",
+              "if (res?.data?.accessToken) pm.environment.set('accessToken', res.data.accessToken);",
+              "const setCookie = pm.response.headers.get('set-cookie');",
+              "if (setCookie) {",
+              "  const m = setCookie.match(/refreshToken=([^;]+)/);",
+              "  if (m) pm.environment.set('refreshToken', m[1]);",
+              "}"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "testEmail",
+      "value": "test@example.com"
+    },
+    {
+      "key": "testPassword",
+      "value": "password123"
+    },
+    {
+      "key": "testName",
+      "value": "Test User"
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "refreshToken",
+      "value": ""
+    }
+  ]
+}
