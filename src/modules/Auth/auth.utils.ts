@@ -6,11 +6,11 @@ const ACCESS_EXPIRES = process.env.JWT_ACCESS_EXPIRES_IN || '1d';
 const REFRESH_EXPIRES = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
 
 export const signAccessToken = (payload: { userId: string; role: string }) => {
-  return jwt.sign(payload, ACCESS_SECRET, { expiresIn: ACCESS_EXPIRES });
+  return jwt.sign(payload, ACCESS_SECRET, { expiresIn: ACCESS_EXPIRES as jwt.SignOptions['expiresIn'] });
 };
 
 export const signRefreshToken = (payload: { userId: string; role: string }) => {
-  return jwt.sign(payload, REFRESH_SECRET, { expiresIn: REFRESH_EXPIRES });
+  return jwt.sign(payload, REFRESH_SECRET, { expiresIn: REFRESH_EXPIRES as jwt.SignOptions['expiresIn'] });
 };
 
 export const verifyRefreshToken = (token: string) => {
