@@ -29,6 +29,7 @@ model Car {
   brand             String
   model             String
   image             String?
+  isDeleted         Boolean   @default(false)
   fuelType          FuelType
   passengerCapacity Int
   color             String
